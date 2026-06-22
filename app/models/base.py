@@ -13,7 +13,7 @@ def _generate_uuid() -> str:
 
 class Base(DeclarativeBase):
     id: Mapped[str] = mapped_column(
-        primary_key=True, default=_generate_uuid, unique=True, nullable=False
+        primary_key=True, default=_generate_uuid, nullable=False
     )
     created_at: Mapped[datetime] = mapped_column(
         default=func.now(), server_default=func.now(), nullable=False

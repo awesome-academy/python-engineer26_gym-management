@@ -9,10 +9,7 @@ A comprehensive REST API for managing gym operations, including user authenticat
 - **Framework**: FastAPI 0.115+
 - **Server**: Uvicorn
 - **Database**: PostgreSQL 16 with AsyncPG
-- **ORM**: SQLAlchemy 2.0+
-- **Async**: Python 3.10+ async/await
-- **Authentication**: JWT with PyJWT and Passlib
-- **Database Migrations**: Alembic
+- **Authentication**: JWT with python-jose and Passlib
 - **Configuration**: Pydantic Settings
 
 ---
@@ -54,6 +51,7 @@ pip install -r requirements.txt
 - `uvicorn[standard]>=0.30.0` - ASGI server
 - `sqlalchemy>=2.0.0` - ORM
 - `asyncpg>=0.30.0` - PostgreSQL async driver
+- `psycopg[binary]>=3.1.0` - PostgreSQL sync driver for Alembic migrations
 - `alembic>=1.13.0` - Database migrations
 - `pydantic>=2.7.0` - Data validation
 - `python-jose[cryptography]>=3.3.0` - JWT tokens
