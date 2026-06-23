@@ -186,6 +186,41 @@ curl http://localhost:8000/api/v1/health
 # Check Swagger docs for all available endpoints
 ```
 
+## Testing
+
+### Run All Tests
+
+```bash
+# Windows (recommended, use project venv)
+.\venv\Scripts\python -m pytest -q
+
+# macOS/Linux
+./venv/bin/python -m pytest -q
+```
+
+### Run Package Tests Only
+
+```bash
+# Unit + E2E tests for package module
+.\venv\Scripts\python -m pytest app/test/package -q
+```
+
+### Run Type Checking for Tests
+
+```bash
+# Check typing for package tests
+.\venv\Scripts\python -m mypy app/test/package
+```
+
+### Notes
+
+- Prefer running test commands through the virtual environment Python to avoid PATH issues.
+- If TestClient reports missing dependency, install/update from requirements:
+
+```bash
+pip install -r requirements.txt
+```
+
 ## Common Tasks
 
 ### Create a Migration
