@@ -3,6 +3,7 @@ from app.schemas.common import PaginatedResponse, PaginationQuery
 from app.schemas.error import ErrorResponse, FieldError, ValidationErrorResponse
 from app.schemas.package import PackageListQuery
 from app.schemas.response import HealthResponse
+from app.schemas.user import CreateUserRequest, UserResponse
 
 __all__ = [
     "PaginatedResponse",
@@ -14,4 +15,6 @@ __all__ = [
     "LoginRequest",
     "PackageListQuery",
     "TokenResponse",
+    "CreateUserRequest",
+    "UserResponse",
 ]

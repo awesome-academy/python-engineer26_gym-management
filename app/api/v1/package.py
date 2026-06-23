@@ -4,7 +4,7 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends, Query, status
 
-from app.dependencies.auth import get_current_user
+from app.dependencies.auth import require_admin
 from app.dependencies.package import get_package_service
 from app.models import User
 from app.schemas.common import PaginatedResponse
@@ -17,10 +17,10 @@ router = APIRouter(prefix="/packages", tags=["Packages"])
 @router.post("", response_model=PackageResponse, status_code=status.HTTP_201_CREATED)
 async def create_package(
     payload: PackageCreate,
-    current_user: User = Depends(get_current_user),
+    current_admin: User = Depends(require_admin),
     service: PackageService = Depends(get_package_service),
 ) -> PackageResponse:
-    return await service.create(current_user=current_user, payload=payload)
+    return await service.create(current_user=current_admin, payload=payload)
 
 
 @router.get("", response_model=PaginatedResponse[PackageResponse])
