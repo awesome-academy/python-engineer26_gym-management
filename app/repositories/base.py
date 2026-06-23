@@ -17,9 +17,8 @@ ModelT = TypeVar("ModelT", bound=Base)
 class BaseRepository(Generic[ModelT]):
     model: type[ModelT]
 
-    def __init__(self, session: AsyncSession, model: type[ModelT]) -> None:
+    def __init__(self, session: AsyncSession) -> None:
         self.session = session
-        self.model = model
 
     async def get_by_id(self, item_id: str) -> ModelT | None:
         stmt = select(self.model).where(

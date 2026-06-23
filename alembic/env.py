@@ -1,3 +1,5 @@
+from app.core.config import settings
+from app.models.base import Base
 from logging.config import fileConfig
 from pathlib import Path
 import sys
@@ -21,11 +23,6 @@ if config.config_file_name is not None:
 
 # add your model's MetaData object here
 # for 'autogenerate' support
-from app.models.base import Base
-from app.models.user import User
-from app.models.package import Package
-from app.models.member import Member
-from app.core.config import settings
 
 target_metadata = Base.metadata
 
@@ -86,7 +83,8 @@ def run_migrations_online() -> None:
     )
 
     with connectable.connect() as connection:
-        context.configure(connection=connection, target_metadata=target_metadata)
+        context.configure(connection=connection,
+                          target_metadata=target_metadata)
 
         with context.begin_transaction():
             context.run_migrations()

@@ -12,10 +12,16 @@ from fastapi.responses import JSONResponse
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from app.api.router import api_router
-from app.core.config import settings
-from app.core.database import engine
+from app.core import ErrorCode, settings, engine
+from app.core.init_db import initialize_super_admin
 from app.core.exceptions import AppException
-from app.schemas import ErrorCode, ErrorResponse, FieldError, HealthResponse, ValidationErrorResponse
+from app.core.redis import init_redis, close_redis
+from app.schemas import (
+    ErrorResponse,
+    FieldError,
+    HealthResponse,
+    ValidationErrorResponse,
+)
 
 logging.basicConfig(
     level=logging.DEBUG if settings.DEBUG else logging.INFO,
@@ -27,9 +33,14 @@ logger = logging.getLogger(__name__)
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     logger.info("Starting up %s v%s", settings.APP_NAME, settings.APP_VERSION)
-    yield
-    await engine.dispose()
-    logger.info("Shutting down %s", settings.APP_NAME)
+    await init_redis()
+    try:
+        await initialize_super_admin()
+        yield
+    finally:
+        await close_redis()
+        await engine.dispose()
+        logger.info("Shutting down %s", settings.APP_NAME)
 
 
 def create_app() -> FastAPI:
@@ -85,8 +96,7 @@ def create_app() -> FastAPI:
             status.HTTP_403_FORBIDDEN: ErrorCode.FORBIDDEN,
             status.HTTP_401_UNAUTHORIZED: ErrorCode.UNAUTHORIZED,
         }
-        error_code = code_map.get(
-            exc.status_code, ErrorCode.INTERNAL_SERVER_ERROR)
+        error_code = code_map.get(exc.status_code, ErrorCode.INTERNAL_SERVER_ERROR)
         return JSONResponse(
             status_code=exc.status_code,
             content=ErrorResponse(
@@ -142,9 +152,7 @@ def create_app() -> FastAPI:
     @app.get("/health", response_model=HealthResponse, tags=["Health"])
     def health_check() -> HealthResponse:
         return HealthResponse(
-            status="ok",
-            app=settings.APP_NAME,
-            version=settings.APP_VERSION
+            status="ok", app=settings.APP_NAME, version=settings.APP_VERSION
         )
 
     return app

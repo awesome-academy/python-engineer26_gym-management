@@ -1,3 +1,4 @@
+from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -20,6 +21,15 @@ class Settings(BaseSettings):
     JWT_ALGORITHM: str = "HS256"
     JWT_ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
     JWT_REFRESH_TOKEN_EXPIRE_DAYS: int = 7
+    SUPER_ADMIN_USERNAME: str = Field(
+        default="admin",
+        description="Initial super admin username. Set via SUPER_ADMIN_USERNAME env var.",
+    )
+    SUPER_ADMIN_PASSWORD: str = Field(
+        default="admin",
+        description="Initial super admin password. Set via SUPER_ADMIN_PASSWORD env var for security.",
+    )
+    REDIS_URL: str = "redis://localhost:6389/0"
 
 
 settings = Settings()

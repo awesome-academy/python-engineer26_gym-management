@@ -1,0 +1,36 @@
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.5.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+      - id: check-json
+      - id: check-merge-conflict
+
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.2.0
+    hooks:
+      - id: ruff
+        args: [--fix, --line-length=88]
+        exclude: ^alembic/
+      - id: ruff-format
+        args: [--line-length=88]
+        exclude: ^alembic/
+
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v1.8.0
+    hooks:
+      - id: mypy
+        additional_dependencies: [
+          "pydantic>=2.7.0",
+          "pydantic-settings>=2.3.0",
+          "sqlalchemy>=2.0.0",
+          "fastapi>=0.115.0",
+          "types-passlib",
+          "types-redis",
+          "python-jose",
+          "types-python-dateutil"
+        ]
+        args: [--ignore-missing-imports, --no-error-summary]
+        exclude: ^(tests/|alembic/)
