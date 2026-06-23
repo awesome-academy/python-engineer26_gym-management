@@ -1,11 +1,12 @@
 from __future__ import annotations
 
-from fastapi import Cookie, Depends
+from fastapi import Cookie, Depends, HTTPException, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from jose import JWTError  # type: ignore[import-untyped]
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core import ErrorCode
+from app.core.enum import UserRole
 from app.core.exceptions import UnauthorizedException
 from app.core.redis import is_token_revoked
 from app.core.security import decode_token
@@ -77,3 +78,14 @@ async def get_current_user(
             code=ErrorCode.UNAUTHORIZED,
         )
     return user
+
+
+async def require_admin(
+    current_user: User = Depends(get_current_user),
+) -> User:
+    if current_user.role != UserRole.ADMIN:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only administrators can access this resource",
+        )
+    return current_user
