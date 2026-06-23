@@ -99,7 +99,7 @@ async def test_create_package_endpoint_returns_403_for_staff() -> None:
         )
 
     assert response.status_code == 403
-    assert response.json()["message"] == "Only admin users can create packages"
+    assert response.json()["message"] == "Only administrators can access this resource"
 
 
 @pytest.mark.asyncio
