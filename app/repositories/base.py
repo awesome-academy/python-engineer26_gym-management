@@ -4,6 +4,7 @@ from datetime import datetime
 from typing import Any, Generic, TypeVar
 
 from sqlalchemy import func, select, inspect
+from sqlalchemy.sql.elements import ColumnElement
 from sqlalchemy.exc import InvalidRequestError
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import RelationshipProperty, selectinload
@@ -125,13 +126,17 @@ class BaseRepository(Generic[ModelT]):
         for attr, value in filters.items():
             if value is None:
                 continue
-            col = getattr(self.model, attr, None)
+
+            field_name, operator = self._parse_filter(attr)
+            col = getattr(self.model, field_name, None)
             if col is None:
                 raise ValueError(
-                    f"Invalid filter field '{attr}' for {self.model.__name__}"
+                    f"Invalid filter field '{field_name}' for {self.model.__name__}"
                 )
-            stmt = stmt.where(col == value)
-            count_stmt = count_stmt.where(col == value)
+
+            condition = self._build_filter_condition(col, operator, value)
+            stmt = stmt.where(condition)
+            count_stmt = count_stmt.where(condition)
 
         sort_col = getattr(self.model, sort_by, None)
         if sort_col is None:
@@ -153,3 +158,25 @@ class BaseRepository(Generic[ModelT]):
         )
 
         return PaginatedResponse(items=list(rows), total=total, page=page, limit=limit)
+
+    def _parse_filter(self, attr: str) -> tuple[str, str]:
+        if "__" not in attr:
+            return attr, "eq"
+
+        field_name, operator = attr.rsplit("__", 1)
+        return field_name, operator.lower()
+
+    def _build_filter_condition(
+        self,
+        col: Any,
+        operator: str,
+        value: Any,
+    ) -> ColumnElement[bool]:
+        if operator == "eq":
+            return col == value
+        if operator == "like":
+            return col.like(f"%{value}%")
+        if operator == "ilike":
+            return col.ilike(f"%{value}%")
+
+        raise ValueError(f"Invalid filter operator '{operator}'")
