@@ -201,6 +201,7 @@ async def test_update_package_admin_success_partial() -> None:
         description="Basic access",
         price=199000,
         duration_days=30,
+        is_active=True,
         deleted_at=None,
     )
     service._repo = mock_repo

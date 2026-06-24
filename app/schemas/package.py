@@ -54,7 +54,7 @@ class PackageUpdate(BaseModel):
     name: str | None = None
     description: str | None = None
     price: float | None = None
-    duration: int| None = Field(default=None, validation_alias="duration_days")
+    duration: int | None = Field(default=None, validation_alias="duration_days")
     is_active: bool | None = None
 
     @field_validator("name")
