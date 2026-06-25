@@ -17,7 +17,7 @@ class CreateUserRequest(BaseModel):
     full_name: str = Field(
         ..., min_length=1, max_length=100, description="Full name of the user"
     )
-    role: UserRole = Field(default=UserRole.STAFF, description="Role of the user")
+    role: UserRole = Field(..., description="Role of the user")
     is_active: bool = Field(default=True, description="Whether the user is active")
 
 
