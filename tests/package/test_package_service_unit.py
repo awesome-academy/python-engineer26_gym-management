@@ -8,10 +8,10 @@ import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.enum import UserRole
-from app.core.exceptions import ForbiddenException
+from app.core.exceptions import ForbiddenException, NotFoundException
 from app.models.user import User
 from app.schemas.common import PaginatedResponse
-from app.schemas.package import PackageCreate
+from app.schemas.package import PackageCreate, PackageUpdate
 from app.services.package import PackageService
 
 
@@ -101,6 +101,8 @@ async def test_get_list_normalizes_name_filter_and_maps_items() -> None:
                 description="Full access",
                 price=499000,
                 duration_days=30,
+                is_active=True,
+                deleted_at=None,
             )
         ],
         total=1,
@@ -142,3 +144,210 @@ async def test_get_list_empty_name_sends_none_filter() -> None:
     assert result.items == []
     assert result.total == 0
     mock_repo.paginate.assert_awaited_once_with(page=1, limit=10, name__ilike=None)
+
+
+@pytest.mark.asyncio
+async def test_get_by_id_success() -> None:
+    service = _make_service()
+    mock_repo = AsyncMock()
+    mock_repo.get_by_id.return_value = SimpleNamespace(
+        id="pkg-1",
+        name="Premium",
+        description="Full access",
+        price=499000,
+        duration_days=30,
+        is_active=True,
+        deleted_at=None,
+    )
+    service._repo = mock_repo
+
+    result = await service.get_by_id("pkg-1")
+
+    assert result.id == "pkg-1"
+    assert result.name == "Premium"
+    assert result.duration == 30
+    mock_repo.get_by_id.assert_awaited_once_with("pkg-1")
+
+
+@pytest.mark.asyncio
+async def test_get_by_id_not_found() -> None:
+    service = _make_service()
+    mock_repo = AsyncMock()
+    mock_repo.get_by_id.return_value = None
+    service._repo = mock_repo
+
+    with pytest.raises(NotFoundException, match="Package not found"):
+        await service.get_by_id("pkg-notfound")
+
+    mock_repo.get_by_id.assert_awaited_once_with("pkg-notfound")
+
+
+@pytest.mark.asyncio
+async def test_update_package_admin_success_partial() -> None:
+    service = _make_service()
+    mock_repo = AsyncMock()
+    mock_package = SimpleNamespace(
+        id="pkg-1",
+        name="Standard",
+        description="Basic access",
+        price=199000,
+        duration_days=30,
+        deleted_at=None,
+    )
+    mock_repo.get_by_id.return_value = mock_package
+    mock_repo.update.return_value = SimpleNamespace(
+        id="pkg-1",
+        name="Premium",
+        description="Basic access",
+        price=199000,
+        duration_days=30,
+        is_active=True,
+        deleted_at=None,
+    )
+    service._repo = mock_repo
+
+    payload = PackageUpdate(name="Premium")
+
+    result = await service.update(
+        current_user=_make_user(UserRole.ADMIN),
+        package_id="pkg-1",
+        payload=payload,
+    )
+
+    assert result.name == "Premium"
+    mock_repo.get_by_id.assert_awaited_once_with("pkg-1")
+    mock_repo.update.assert_awaited_once_with(mock_package, name="Premium")
+
+
+@pytest.mark.asyncio
+async def test_update_package_admin_success_full() -> None:
+    service = _make_service()
+    mock_repo = AsyncMock()
+    mock_package = SimpleNamespace(
+        id="pkg-1",
+        name="Standard",
+        description="Basic access",
+        price=199000,
+        duration_days=30,
+        deleted_at=None,
+    )
+    mock_repo.get_by_id.return_value = mock_package
+    mock_repo.update.return_value = SimpleNamespace(
+        id="pkg-1",
+        name="Premium Plus",
+        description="Full premium access",
+        price=699000,
+        duration_days=60,
+        deleted_at=None,
+    )
+    service._repo = mock_repo
+
+    payload = PackageUpdate(
+        name="Premium Plus",
+        description="Full premium access",
+        price=699000,
+        duration=60,
+    )
+
+    result = await service.update(
+        current_user=_make_user(UserRole.ADMIN),
+        package_id="pkg-1",
+        payload=payload,
+    )
+
+    assert result.name == "Premium Plus"
+    assert result.description == "Full premium access"
+    assert result.price == 699000
+    assert result.duration == 60
+
+
+@pytest.mark.asyncio
+async def test_update_package_staff_forbidden() -> None:
+    service = _make_service()
+    mock_repo = AsyncMock()
+    service._repo = mock_repo
+
+    payload = PackageUpdate(name="New Name")
+
+    with pytest.raises(
+        ForbiddenException, match="Only admin users can update packages"
+    ):
+        await service.update(
+            current_user=_make_user(UserRole.STAFF),
+            package_id="pkg-1",
+            payload=payload,
+        )
+
+    mock_repo.get_by_id.assert_not_awaited()
+
+
+@pytest.mark.asyncio
+async def test_update_package_not_found() -> None:
+    service = _make_service()
+    mock_repo = AsyncMock()
+    mock_repo.get_by_id.return_value = None
+    service._repo = mock_repo
+
+    payload = PackageUpdate(name="New Name")
+
+    with pytest.raises(NotFoundException, match="Package not found"):
+        await service.update(
+            current_user=_make_user(UserRole.ADMIN),
+            package_id="pkg-notfound",
+            payload=payload,
+        )
+
+
+@pytest.mark.asyncio
+async def test_delete_package_admin_success() -> None:
+    service = _make_service()
+    mock_repo = AsyncMock()
+    mock_package = SimpleNamespace(
+        id="pkg-1",
+        name="Premium",
+        description="Full access",
+        price=499000,
+        duration_days=30,
+        deleted_at=None,
+    )
+    mock_repo.get_by_id.return_value = mock_package
+    service._repo = mock_repo
+
+    await service.delete(
+        current_user=_make_user(UserRole.ADMIN),
+        package_id="pkg-1",
+    )
+
+    mock_repo.get_by_id.assert_awaited_once_with("pkg-1")
+    mock_repo.delete.assert_awaited_once_with(mock_package)
+
+
+@pytest.mark.asyncio
+async def test_delete_package_staff_forbidden() -> None:
+    service = _make_service()
+    mock_repo = AsyncMock()
+    service._repo = mock_repo
+
+    with pytest.raises(
+        ForbiddenException, match="Only admin users can delete packages"
+    ):
+        await service.delete(
+            current_user=_make_user(UserRole.STAFF),
+            package_id="pkg-1",
+        )
+
+    mock_repo.get_by_id.assert_not_awaited()
+
+
+@pytest.mark.asyncio
+async def test_delete_package_not_found() -> None:
+    service = _make_service()
+    mock_repo = AsyncMock()
+    mock_repo.get_by_id.return_value = None
+    service._repo = mock_repo
+
+    with pytest.raises(NotFoundException, match="Package not found"):
+        await service.delete(
+            current_user=_make_user(UserRole.ADMIN),
+            package_id="pkg-notfound",
+        )
