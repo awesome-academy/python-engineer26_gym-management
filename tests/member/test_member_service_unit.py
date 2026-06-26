@@ -191,7 +191,7 @@ async def test_get_list_with_phone_filter() -> None:
 
     assert len(result.items) == 1
     mock_repo.paginate.assert_awaited_once_with(
-        page=1, limit=10, phone__ilike="0901234567"
+        page=1, limit=10, phone__ilike="0901234567", full_name__ilike=None
     )
 
 
@@ -220,7 +220,7 @@ async def test_get_list_with_full_name_filter() -> None:
 
     assert len(result.items) == 1
     mock_repo.paginate.assert_awaited_once_with(
-        page=1, limit=10, full_name__ilike="John"
+        page=1, limit=10, phone__ilike=None, full_name__ilike="John"
     )
 
 
@@ -242,7 +242,9 @@ async def test_get_list_with_pagination() -> None:
 
     assert result.page == 2
     assert result.limit == 5
-    mock_repo.paginate.assert_awaited_once_with(page=2, limit=5)
+    mock_repo.paginate.assert_awaited_once_with(
+        page=2, limit=5, phone__ilike=None, full_name__ilike=None
+    )
 
 
 @pytest.mark.asyncio
