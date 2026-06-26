@@ -65,8 +65,8 @@ class SubscriptionService:
         subscriptions = await self._repo.paginate(
             page=query.page,
             limit=query.limit,
-            start_date=query.start_date or None,
-            end_date=query.end_date or None,
+            start_date__gte=query.start_date or None,
+            end_date__lte=query.end_date or None,
             member_id=query.member_id or None,
             status=query.status.value if query.status else None,
             package_id=query.package_id or None,

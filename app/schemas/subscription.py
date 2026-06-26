@@ -43,7 +43,7 @@ class UpdateSubscriptionRequest(BaseModel):
 
     @field_validator("end_date")
     @classmethod
-    def end_date_after_start(cls, v: date, info) -> date:
+    def end_date_after_start(cls, v: date | None, info) -> date | None:
         if v is None:
             return v
         start_date = info.data.get("start_date")
@@ -77,6 +77,14 @@ class SubscriptionListQuery(PaginationQuery):
         description="Filter by subscription status",
     )
     package_id: str = Field(default="", description="Filter by package id")
+
+    @field_validator("end_date")
+    @classmethod
+    def end_date_not_before_start_date(cls, v: date | None, info) -> date | None:
+        start_date = info.data.get("start_date")
+        if v is not None and start_date is not None and v < start_date:
+            raise ValueError("End date must be on or after start date")
+        return v
 
     @field_validator("member_id", "package_id")
     @classmethod
