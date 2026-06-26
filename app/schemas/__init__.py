@@ -6,6 +6,13 @@ from app.schemas.member import MemberListQuery
 from app.schemas.response import HealthResponse
 from app.schemas.user import CreateUserRequest, UserResponse
 
+from app.schemas.subscription import (
+    CreateSubscriptionRequest,
+    UpdateSubscriptionRequest,
+    SubscriptionListQuery,
+    SubscriptionResponse,
+)
+
 __all__ = [
     "PaginatedResponse",
     "PaginationQuery",
@@ -19,4 +26,8 @@ __all__ = [
     "TokenResponse",
     "CreateUserRequest",
     "UserResponse",
+    "CreateSubscriptionRequest",
+    "UpdateSubscriptionRequest",
+    "SubscriptionListQuery",
+    "SubscriptionResponse",
 ]
