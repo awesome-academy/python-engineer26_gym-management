@@ -62,6 +62,15 @@ class ConflictException(AppException):
         )
 
 
+class BadRequestException(AppException):
+    def __init__(self, message: str, code: str | None = None):
+        super().__init__(
+            code=code or "bad_request",
+            message=message,
+            status_code=status.HTTP_400_BAD_REQUEST,
+        )
+
+
 class InternalServerException(AppException):
     def __init__(self, message: str = "Internal server error", code: str | None = None):
         super().__init__(

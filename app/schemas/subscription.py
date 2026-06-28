@@ -10,46 +10,20 @@ from app.schemas.common import PaginationQuery
 
 
 class CreateSubscriptionRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
     member_id: str = Field(..., description="Member ID")
     package_id: str = Field(..., description="Package ID")
     start_date: date = Field(..., description="Subscription start date")
-    end_date: date = Field(..., description="Subscription end date")
     price: float = Field(..., gt=0, description="Subscription price")
-    status: SubscriptionStatus = Field(
-        default=SubscriptionStatus.PENDING, description="Subscription status"
-    )
-    sold_by: Optional[str] = Field(
-        None, description="Staff ID who sold the subscription"
-    )
-
-    @field_validator("end_date")
-    @classmethod
-    def end_date_after_start(cls, v: date, info) -> date:
-        if "start_date" in info.data and v <= info.data["start_date"]:
-            raise ValueError("End date must be after start date")
-        return v
 
 
 class UpdateSubscriptionRequest(BaseModel):
-    start_date: Optional[date] = Field(None, description="Subscription start date")
-    end_date: Optional[date] = Field(None, description="Subscription end date")
-    price: Optional[float] = Field(None, gt=0, description="Subscription price")
-    status: Optional[SubscriptionStatus] = Field(
-        None, description="Subscription status"
-    )
-    sold_by: Optional[str] = Field(
-        None, description="Staff ID who sold the subscription"
-    )
+    model_config = ConfigDict(extra="forbid")
 
-    @field_validator("end_date")
-    @classmethod
-    def end_date_after_start(cls, v: date | None, info) -> date | None:
-        if v is None:
-            return v
-        start_date = info.data.get("start_date")
-        if start_date and v <= start_date:
-            raise ValueError("End date must be after start date")
-        return v
+    package_id: Optional[str] = Field(None, description="Package ID")
+    start_date: Optional[date] = Field(None, description="Subscription start date")
+    price: Optional[float] = Field(None, gt=0, description="Subscription price")
 
 
 class SubscriptionResponse(BaseModel):
@@ -63,7 +37,7 @@ class SubscriptionResponse(BaseModel):
     status: SubscriptionStatus
     price: float
     created_by: Optional[str] = None
-    sold_by: Optional[str] = None
+    updated_by: Optional[str] = None
     created_at: datetime
     updated_at: datetime
 

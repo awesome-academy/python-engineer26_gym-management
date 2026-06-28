@@ -28,4 +28,6 @@ class Subscription(Base):
     created_by: Mapped[str | None] = mapped_column(
         ForeignKey("users.id"), nullable=True
     )
-    sold_by: Mapped[str | None] = mapped_column(ForeignKey("users.id"), nullable=True)
+    updated_by: Mapped[str | None] = mapped_column(
+        ForeignKey("users.id"), nullable=True
+    )

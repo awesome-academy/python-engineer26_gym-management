@@ -12,6 +12,7 @@ from app.schemas.subscription import (
     CreateSubscriptionRequest,
     SubscriptionListQuery,
     SubscriptionResponse,
+    UpdateSubscriptionRequest,
 )
 from app.services.subscription import SubscriptionService
 
@@ -27,6 +28,44 @@ async def create_subscription(
     service: SubscriptionService = Depends(get_subscription_service),
 ) -> SubscriptionResponse:
     return await service.create(current_user=current_user, payload=payload)
+
+
+@router.put("/{subscription_id}", response_model=SubscriptionResponse)
+async def update_subscription(
+    subscription_id: str,
+    payload: UpdateSubscriptionRequest,
+    current_user: User = Depends(get_current_user),
+    service: SubscriptionService = Depends(get_subscription_service),
+) -> SubscriptionResponse:
+    return await service.update(
+        subscription_id=subscription_id,
+        current_user=current_user,
+        payload=payload,
+    )
+
+
+@router.post("/{subscription_id}/activate", response_model=SubscriptionResponse)
+async def activate_subscription(
+    subscription_id: str,
+    current_user: User = Depends(get_current_user),
+    service: SubscriptionService = Depends(get_subscription_service),
+) -> SubscriptionResponse:
+    return await service.activate(
+        subscription_id=subscription_id,
+        current_user=current_user,
+    )
+
+
+@router.post("/{subscription_id}/cancel", response_model=SubscriptionResponse)
+async def cancel_subscription(
+    subscription_id: str,
+    current_user: User = Depends(get_current_user),
+    service: SubscriptionService = Depends(get_subscription_service),
+) -> SubscriptionResponse:
+    return await service.cancel(
+        subscription_id=subscription_id,
+        current_user=current_user,
+    )
 
 
 @router.get("", response_model=PaginatedResponse[SubscriptionResponse])
