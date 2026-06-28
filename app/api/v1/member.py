@@ -15,7 +15,12 @@ from app.schemas.member import (
     MemberListQuery,
     MemberResponse,
 )
+from app.schemas.member_subscription import (
+    CreateMemberSubscriptionRequest,
+    MemberSubscriptionResponse,
+)
 from app.services.member import MemberService
+from app.services.member_subscription import MemberSubscriptionService
 
 router = APIRouter(prefix="/members", tags=["Members"])
 
@@ -64,3 +69,17 @@ async def delete_member(
     session: AsyncSession = Depends(get_db),
 ) -> None:
     await MemberService(session).delete(member_id)
+
+
+@router.post(
+    "/{member_id}/subscription",
+    response_model=MemberSubscriptionResponse,
+    status_code=status.HTTP_201_CREATED,
+)
+async def create_member_subscription(
+    member_id: str,
+    payload: CreateMemberSubscriptionRequest,
+    current_user: User = Depends(get_current_user),
+    session: AsyncSession = Depends(get_db),
+) -> MemberSubscriptionResponse:
+    return await MemberSubscriptionService(session).create(member_id, payload)
