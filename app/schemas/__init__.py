@@ -5,11 +5,6 @@ from app.schemas.package import PackageListQuery
 from app.schemas.member import MemberListQuery
 from app.schemas.response import HealthResponse
 from app.schemas.user import CreateUserRequest, UserResponse
-from app.schemas.member_subscription import (
-    CreateMemberSubscriptionRequest,
-    MemberSubscriptionResponse,
-)
-
 from app.schemas.subscription import (
     CreateSubscriptionRequest,
     UpdateSubscriptionRequest,
@@ -27,8 +22,6 @@ __all__ = [
     "LoginRequest",
     "PackageListQuery",
     "MemberListQuery",
-    "CreateMemberSubscriptionRequest",
-    "MemberSubscriptionResponse",
     "TokenResponse",
     "CreateUserRequest",
     "UserResponse",
