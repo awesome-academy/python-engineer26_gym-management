@@ -174,6 +174,14 @@ class BaseRepository(Generic[ModelT]):
     ) -> ColumnElement[bool]:
         if operator == "eq":
             return col == value
+        if operator == "gt":
+            return col > value
+        if operator == "gte":
+            return col >= value
+        if operator == "lt":
+            return col < value
+        if operator == "lte":
+            return col <= value
         if operator == "like":
             return col.like(f"%{value}%")
         if operator == "ilike":

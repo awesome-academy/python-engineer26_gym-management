@@ -67,7 +67,7 @@ class PackageService:
         if not package:
             raise NotFoundException("Package not found")
 
-        update_data = {}
+        update_data: dict[str, object] = {}
         if payload.name is not None:
             update_data["name"] = payload.name
         if payload.description is not None:

@@ -10,6 +10,13 @@ from app.schemas.member_subscription import (
     MemberSubscriptionResponse,
 )
 
+from app.schemas.subscription import (
+    CreateSubscriptionRequest,
+    UpdateSubscriptionRequest,
+    SubscriptionListQuery,
+    SubscriptionResponse,
+)
+
 __all__ = [
     "PaginatedResponse",
     "PaginationQuery",
@@ -25,4 +32,8 @@ __all__ = [
     "TokenResponse",
     "CreateUserRequest",
     "UserResponse",
+    "CreateSubscriptionRequest",
+    "UpdateSubscriptionRequest",
+    "SubscriptionListQuery",
+    "SubscriptionResponse",
 ]
