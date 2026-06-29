@@ -13,6 +13,7 @@ from app.schemas.member import (
     CreateMemberRequest,
     UpdateMemberRequest,
     MemberListQuery,
+    MemberDetailResponse,
     MemberResponse,
 )
 from app.services.member import MemberService
@@ -29,13 +30,15 @@ async def create_member(
     return await MemberService(session).create(payload)
 
 
-@router.get("/{member_id}", response_model=MemberResponse)
+@router.get("/{member_id}", response_model=MemberDetailResponse)
 async def get_member(
     member_id: str,
+    page: int = Query(1, ge=1),
+    limit: int = Query(10, ge=1, le=100),
     current_user: User = Depends(get_current_user),
     session: AsyncSession = Depends(get_db),
-) -> MemberResponse:
-    return await MemberService(session).get(member_id)
+) -> MemberDetailResponse:
+    return await MemberService(session).get(member_id, page=page, limit=limit)
 
 
 @router.put("/{member_id}", response_model=MemberResponse)

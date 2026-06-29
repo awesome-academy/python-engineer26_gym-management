@@ -54,7 +54,9 @@ async def test_create_subscription_sets_created_by_and_pending_status() -> None:
     service._repo = AsyncMock()
 
     service._member_repo.get_by_id.return_value = SimpleNamespace(id="member-1")
-    service._package_repo.get_by_id.return_value = _make_package(duration_days=30)
+    service._package_repo.get_active_by_id.return_value = _make_package(
+        duration_days=30
+    )
     service._repo.get_overlapping_for_member.return_value = None
     service._repo.create.return_value = SimpleNamespace(
         id="sub-1",
@@ -109,7 +111,9 @@ async def test_create_subscription_conflicts_on_overlapping_period() -> None:
     service._repo = AsyncMock()
 
     service._member_repo.get_by_id.return_value = SimpleNamespace(id="member-1")
-    service._package_repo.get_by_id.return_value = _make_package(duration_days=30)
+    service._package_repo.get_active_by_id.return_value = _make_package(
+        duration_days=30
+    )
     service._repo.get_overlapping_for_member.return_value = SimpleNamespace(
         id="sub-existing",
         status=SubscriptionStatus.ACTIVE,
@@ -164,7 +168,7 @@ async def test_update_subscription_recalculates_end_date_and_sets_updated_by() -
     )
 
     service._repo.get_by_id.return_value = current_subscription
-    service._package_repo.get_by_id.return_value = _make_package(
+    service._package_repo.get_active_by_id.return_value = _make_package(
         package_id="package-2",
         duration_days=60,
     )
@@ -224,13 +228,16 @@ async def test_update_subscription_conflicts_on_overlapping_period() -> None:
     )
 
     service._repo.get_by_id.return_value = current_subscription
-    service._package_repo.get_by_id.return_value = _make_package(duration_days=30)
+    service._package_repo.get_active_by_id.return_value = _make_package(
+        duration_days=30
+    )
     service._repo.get_overlapping_for_member.return_value = SimpleNamespace(
         id="sub-existing",
         status=SubscriptionStatus.ACTIVE,
     )
 
     payload = UpdateSubscriptionRequest(
+        package_id=None,
         start_date=date(2026, 6, 10),
         price=599000.0,
     )
@@ -421,7 +428,7 @@ async def test_create_subscription_package_not_found() -> None:
     service._repo = AsyncMock()
 
     service._member_repo.get_by_id.return_value = SimpleNamespace(id="member-1")
-    service._package_repo.get_by_id.return_value = None
+    service._package_repo.get_active_by_id.return_value = None
 
     payload = CreateSubscriptionRequest(
         member_id="member-1",

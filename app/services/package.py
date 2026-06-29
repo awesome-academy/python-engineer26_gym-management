@@ -52,7 +52,7 @@ class PackageService:
         )
 
     async def get_by_id(self, package_id: str) -> PackageResponse:
-        package = await self._repo.get_by_id(package_id)
+        package = await self._repo.get_active_by_id(package_id)
         if not package:
             raise NotFoundException("Package not found")
         return PackageResponse.model_validate(package, from_attributes=True)
@@ -63,7 +63,7 @@ class PackageService:
         if not current_user.role == UserRole.ADMIN:
             raise ForbiddenException("Only admin users can update packages")
 
-        package = await self._repo.get_by_id(package_id)
+        package = await self._repo.get_active_by_id(package_id)
         if not package:
             raise NotFoundException("Package not found")
 
@@ -88,7 +88,7 @@ class PackageService:
         if not current_user.role == UserRole.ADMIN:
             raise ForbiddenException("Only admin users can delete packages")
 
-        package = await self._repo.get_by_id(package_id)
+        package = await self._repo.get_active_by_id(package_id)
         if not package:
             raise NotFoundException("Package not found")
 

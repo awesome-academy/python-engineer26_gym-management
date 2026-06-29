@@ -294,6 +294,8 @@ def test_get_member_endpoint_returns_200_for_valid_id() -> None:
     assert data["id"] == "member-1"
     assert data["phone"] == "0901234567"
     assert data["full_name"] == "John Doe"
+    assert "subscription_history" in data
+    assert data["subscription_history"]["items"] == []
 
 
 def test_get_member_endpoint_returns_404_for_invalid_id() -> None:
