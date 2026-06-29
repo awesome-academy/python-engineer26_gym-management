@@ -81,3 +81,6 @@ class SubscriptionService:
             page=subscriptions.page,
             limit=subscriptions.limit,
         )
+
+    async def update_expired_subscriptions(self) -> int:
+        return await self._repo.update_expired_subscriptions()

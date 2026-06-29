@@ -16,6 +16,7 @@ from app.core import ErrorCode, settings, engine
 from app.core.init_db import initialize_super_admin
 from app.core.exceptions import AppException
 from app.core.redis import init_redis, close_redis
+from app.core.scheduler import SchedulerService
 from app.schemas import (
     ErrorResponse,
     FieldError,
@@ -34,11 +35,13 @@ logger = logging.getLogger(__name__)
 async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     logger.info("Starting up %s v%s", settings.APP_NAME, settings.APP_VERSION)
     await init_redis()
+    await SchedulerService.init_scheduler()
     try:
         await initialize_super_admin()
         yield
     finally:
         await close_redis()
+        await SchedulerService.shutdown_scheduler()
         await engine.dispose()
         logger.info("Shutting down %s", settings.APP_NAME)
 

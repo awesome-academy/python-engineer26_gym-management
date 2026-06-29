@@ -11,6 +11,7 @@ from app.schemas.subscription import (
     SubscriptionListQuery,
     SubscriptionResponse,
 )
+from app.schemas.checkin import CheckInResponse, CreateCheckInRequest
 
 __all__ = [
     "PaginatedResponse",
@@ -29,4 +30,6 @@ __all__ = [
     "UpdateSubscriptionRequest",
     "SubscriptionListQuery",
     "SubscriptionResponse",
+    "CheckInResponse",
+    "CreateCheckInRequest",
 ]
