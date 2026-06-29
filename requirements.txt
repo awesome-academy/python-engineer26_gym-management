@@ -11,6 +11,7 @@ python-jose[cryptography]>=3.3.0
 passlib[argon2]>=1.7.4
 cffi>=1.15.0
 redis[asyncio]>=5.0.0
+apscheduler>=3.10.0
 
 # Development & Code Quality
 pre-commit>=3.5.0

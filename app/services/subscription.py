@@ -143,10 +143,13 @@ class SubscriptionService:
                 f"Subscription with id '{subscription_id}' is already active"
             )
 
-        if subscription.status in (SubscriptionStatus.CANCELLED, SubscriptionStatus.EXPIRED):
-             raise BadRequestException(
-                 f"Subscription with id '{subscription_id}' cannot be activated because it is {subscription.status.value}"
-             )
+        if subscription.status in (
+            SubscriptionStatus.CANCELLED,
+            SubscriptionStatus.EXPIRED,
+        ):
+            raise BadRequestException(
+                f"Subscription with id '{subscription_id}' cannot be activated because it is {subscription.status.value}"
+            )
 
         await self._ensure_subscription_period_is_available(
             member_id=subscription.member_id,
@@ -214,3 +217,6 @@ class SubscriptionService:
 
     def _calculate_end_date(self, start_date: date, duration_days: int) -> date:
         return start_date + timedelta(days=duration_days)
+
+    async def update_expired_subscriptions(self) -> int:
+        return await self._repo.update_expired_subscriptions()
