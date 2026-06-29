@@ -143,6 +143,11 @@ class SubscriptionService:
                 f"Subscription with id '{subscription_id}' is already active"
             )
 
+        if subscription.status in (SubscriptionStatus.CANCELLED, SubscriptionStatus.EXPIRED):
+             raise BadRequestException(
+                 f"Subscription with id '{subscription_id}' cannot be activated because it is {subscription.status.value}"
+             )
+
         await self._ensure_subscription_period_is_available(
             member_id=subscription.member_id,
             start_date=subscription.start_date,

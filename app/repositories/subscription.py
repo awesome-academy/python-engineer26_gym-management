@@ -27,8 +27,8 @@ class SubscriptionRepository(BaseRepository[Subscription]):
             self.model.deleted_at.is_(None),
             self.model.member_id == member_id,
             self.model.status == SubscriptionStatus.ACTIVE,
-            self.model.start_date <= end_date,
-            self.model.end_date >= start_date,
+            self.model.start_date < end_date,
+            self.model.end_date > start_date,
         ]
 
         if exclude_subscription_id:
