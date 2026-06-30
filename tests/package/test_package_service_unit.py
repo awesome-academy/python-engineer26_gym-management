@@ -150,7 +150,7 @@ async def test_get_list_empty_name_sends_none_filter() -> None:
 async def test_get_by_id_success() -> None:
     service = _make_service()
     mock_repo = AsyncMock()
-    mock_repo.get_by_id.return_value = SimpleNamespace(
+    mock_repo.get_active_by_id.return_value = SimpleNamespace(
         id="pkg-1",
         name="Premium",
         description="Full access",
@@ -166,20 +166,20 @@ async def test_get_by_id_success() -> None:
     assert result.id == "pkg-1"
     assert result.name == "Premium"
     assert result.duration == 30
-    mock_repo.get_by_id.assert_awaited_once_with("pkg-1")
+    mock_repo.get_active_by_id.assert_awaited_once_with("pkg-1")
 
 
 @pytest.mark.asyncio
 async def test_get_by_id_not_found() -> None:
     service = _make_service()
     mock_repo = AsyncMock()
-    mock_repo.get_by_id.return_value = None
+    mock_repo.get_active_by_id.return_value = None
     service._repo = mock_repo
 
     with pytest.raises(NotFoundException, match="Package not found"):
         await service.get_by_id("pkg-notfound")
 
-    mock_repo.get_by_id.assert_awaited_once_with("pkg-notfound")
+    mock_repo.get_active_by_id.assert_awaited_once_with("pkg-notfound")
 
 
 @pytest.mark.asyncio
@@ -194,7 +194,7 @@ async def test_update_package_admin_success_partial() -> None:
         duration_days=30,
         deleted_at=None,
     )
-    mock_repo.get_by_id.return_value = mock_package
+    mock_repo.get_active_by_id.return_value = mock_package
     mock_repo.update.return_value = SimpleNamespace(
         id="pkg-1",
         name="Premium",
@@ -215,7 +215,7 @@ async def test_update_package_admin_success_partial() -> None:
     )
 
     assert result.name == "Premium"
-    mock_repo.get_by_id.assert_awaited_once_with("pkg-1")
+    mock_repo.get_active_by_id.assert_awaited_once_with("pkg-1")
     mock_repo.update.assert_awaited_once_with(mock_package, name="Premium")
 
 
@@ -231,7 +231,7 @@ async def test_update_package_admin_success_full() -> None:
         duration_days=30,
         deleted_at=None,
     )
-    mock_repo.get_by_id.return_value = mock_package
+    mock_repo.get_active_by_id.return_value = mock_package
     mock_repo.update.return_value = SimpleNamespace(
         id="pkg-1",
         name="Premium Plus",
@@ -278,14 +278,14 @@ async def test_update_package_staff_forbidden() -> None:
             payload=payload,
         )
 
-    mock_repo.get_by_id.assert_not_awaited()
+    mock_repo.get_active_by_id.assert_not_awaited()
 
 
 @pytest.mark.asyncio
 async def test_update_package_not_found() -> None:
     service = _make_service()
     mock_repo = AsyncMock()
-    mock_repo.get_by_id.return_value = None
+    mock_repo.get_active_by_id.return_value = None
     service._repo = mock_repo
 
     payload = PackageUpdate(name="New Name")
@@ -310,7 +310,7 @@ async def test_delete_package_admin_success() -> None:
         duration_days=30,
         deleted_at=None,
     )
-    mock_repo.get_by_id.return_value = mock_package
+    mock_repo.get_active_by_id.return_value = mock_package
     service._repo = mock_repo
 
     await service.delete(
@@ -318,7 +318,7 @@ async def test_delete_package_admin_success() -> None:
         package_id="pkg-1",
     )
 
-    mock_repo.get_by_id.assert_awaited_once_with("pkg-1")
+    mock_repo.get_active_by_id.assert_awaited_once_with("pkg-1")
     mock_repo.delete.assert_awaited_once_with(mock_package)
 
 
@@ -336,14 +336,14 @@ async def test_delete_package_staff_forbidden() -> None:
             package_id="pkg-1",
         )
 
-    mock_repo.get_by_id.assert_not_awaited()
+    mock_repo.get_active_by_id.assert_not_awaited()
 
 
 @pytest.mark.asyncio
 async def test_delete_package_not_found() -> None:
     service = _make_service()
     mock_repo = AsyncMock()
-    mock_repo.get_by_id.return_value = None
+    mock_repo.get_active_by_id.return_value = None
     service._repo = mock_repo
 
     with pytest.raises(NotFoundException, match="Package not found"):

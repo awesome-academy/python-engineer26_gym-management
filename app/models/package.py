@@ -1,11 +1,15 @@
 from __future__ import annotations
 
 from decimal import Decimal
+from typing import TYPE_CHECKING
 
 from sqlalchemy import Numeric, String, Text
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.models.base import Base
+
+if TYPE_CHECKING:
+    from app.models.subscription import Subscription
 
 
 class Package(Base):
@@ -18,3 +22,5 @@ class Package(Base):
     duration_days: Mapped[int] = mapped_column(nullable=False)
     price: Mapped[Decimal] = mapped_column(Numeric(12, 2), nullable=False)
     is_active: Mapped[bool] = mapped_column(nullable=False, default=True)
+
+    subscriptions: Mapped[list[Subscription]] = relationship("Subscription")

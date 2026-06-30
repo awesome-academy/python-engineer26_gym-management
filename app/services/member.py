@@ -9,9 +9,11 @@ from app.schemas.common import PaginatedResponse
 from app.schemas.member import (
     CreateMemberRequest,
     UpdateMemberRequest,
+    MemberDetailResponse,
     MemberResponse,
     MemberListQuery,
 )
+from app.schemas.subscription import SubscriptionResponse
 
 
 class MemberService:
@@ -41,11 +43,38 @@ class MemberService:
 
         return MemberResponse.model_validate(member, from_attributes=True)
 
-    async def get(self, member_id: str) -> MemberResponse:
-        member = await self._repo.get_by_id(member_id)
+    async def get(
+        self,
+        member_id: str,
+        *,
+        page: int = 1,
+        limit: int = 10,
+    ) -> MemberDetailResponse:
+        member, subscriptions, total = await self._repo.get_with_subscription_history(
+            member_id,
+            page=page,
+            limit=limit,
+        )
         if not member:
             raise NotFoundException(f"Member with id '{member_id}' not found")
-        return MemberResponse.model_validate(member, from_attributes=True)
+
+        member_response = MemberResponse.model_validate(member, from_attributes=True)
+
+        return MemberDetailResponse(
+            **member_response.model_dump(),
+            subscription_history=PaginatedResponse[SubscriptionResponse](
+                items=[
+                    SubscriptionResponse.model_validate(
+                        subscription,
+                        from_attributes=True,
+                    )
+                    for subscription in subscriptions
+                ],
+                total=total,
+                page=page,
+                limit=limit,
+            ),
+        )
 
     async def update(
         self, member_id: str, payload: UpdateMemberRequest

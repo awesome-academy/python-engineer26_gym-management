@@ -153,7 +153,7 @@ async def test_get_packages_endpoint_returns_paginated_data() -> None:
 async def test_get_package_by_id_returns_200() -> None:
     service = _make_service()
     mock_repo = AsyncMock()
-    mock_repo.get_by_id.return_value = SimpleNamespace(
+    mock_repo.get_active_by_id.return_value = SimpleNamespace(
         id="pkg-1",
         name="Premium",
         description="Full access",
@@ -183,7 +183,7 @@ async def test_get_package_by_id_returns_200() -> None:
 async def test_get_package_by_id_returns_404_when_not_found() -> None:
     service = _make_service()
     mock_repo = AsyncMock()
-    mock_repo.get_by_id.return_value = None
+    mock_repo.get_active_by_id.return_value = None
     service._repo = mock_repo
 
     with _build_test_client(service) as client:
@@ -206,7 +206,7 @@ async def test_update_package_returns_200_for_admin() -> None:
         is_active=True,
         deleted_at=None,
     )
-    mock_repo.get_by_id.return_value = mock_package
+    mock_repo.get_active_by_id.return_value = mock_package
     mock_repo.update.return_value = SimpleNamespace(
         id="pkg-1",
         name="Premium",
@@ -251,7 +251,7 @@ async def test_update_package_returns_403_for_staff() -> None:
 async def test_update_package_returns_404_when_not_found() -> None:
     service = _make_service()
     mock_repo = AsyncMock()
-    mock_repo.get_by_id.return_value = None
+    mock_repo.get_active_by_id.return_value = None
     service._repo = mock_repo
 
     with _build_test_client(service, _make_user(UserRole.ADMIN)) as client:
@@ -279,7 +279,7 @@ async def test_delete_package_returns_204_for_admin() -> None:
         is_active=True,
         deleted_at=None,
     )
-    mock_repo.get_by_id.return_value = mock_package
+    mock_repo.get_active_by_id.return_value = mock_package
     service._repo = mock_repo
 
     with _build_test_client(service, _make_user(UserRole.ADMIN)) as client:
@@ -305,7 +305,7 @@ async def test_delete_package_returns_403_for_staff() -> None:
 async def test_delete_package_returns_404_when_not_found() -> None:
     service = _make_service()
     mock_repo = AsyncMock()
-    mock_repo.get_by_id.return_value = None
+    mock_repo.get_active_by_id.return_value = None
     service._repo = mock_repo
 
     with _build_test_client(service, _make_user(UserRole.ADMIN)) as client:

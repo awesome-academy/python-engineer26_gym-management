@@ -6,7 +6,8 @@ from typing import Optional
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
-from app.schemas.common import PaginationQuery
+from app.schemas.common import PaginatedResponse, PaginationQuery
+from app.schemas.subscription import SubscriptionResponse
 
 
 def _validate_phone(v: str | None) -> str | None:
@@ -83,6 +84,14 @@ class MemberResponse(BaseModel):
     note: Optional[str] = None
     created_at: datetime
     updated_at: datetime
+
+
+class MemberDetailResponse(MemberResponse):
+    subscription_history: PaginatedResponse[SubscriptionResponse] = Field(
+        default_factory=lambda: PaginatedResponse[SubscriptionResponse](
+            items=[], total=0, page=1, limit=10
+        )
+    )
 
 
 class MemberListQuery(PaginationQuery):

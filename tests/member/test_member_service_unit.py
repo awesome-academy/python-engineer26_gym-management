@@ -58,6 +58,9 @@ async def test_create_member_success_with_valid_data() -> None:
         phone="0901234567",
         full_name="John Doe",
         date_of_birth=date(1990, 1, 1),
+        gender=None,
+        avatar_url=None,
+        note=None,
     )
 
     result = await service.create(request_data)
@@ -83,6 +86,10 @@ async def test_create_member_fails_with_duplicate_phone() -> None:
     request_data = CreateMemberRequest(
         phone="0901234567",
         full_name="John Doe",
+        date_of_birth=None,
+        gender=None,
+        avatar_url=None,
+        note=None,
     )
 
     with pytest.raises(ConflictException) as exc_info:
@@ -106,6 +113,10 @@ async def test_create_member_preserves_phone() -> None:
     request_data = CreateMemberRequest(
         phone="+84901234567",
         full_name="Member",
+        date_of_birth=None,
+        gender=None,
+        avatar_url=None,
+        note=None,
     )
 
     result = await service.create(request_data)
@@ -127,6 +138,10 @@ async def test_create_member_preserves_full_name() -> None:
     request_data = CreateMemberRequest(
         phone="0901234567",
         full_name="José García-López",
+        date_of_birth=None,
+        gender=None,
+        avatar_url=None,
+        note=None,
     )
 
     result = await service.create(request_data)
@@ -233,7 +248,9 @@ async def test_get_list_with_pagination() -> None:
     service = _make_member_service()
     mock_repo = AsyncMock()
 
-    paginated = PaginatedResponse(items=[], total=0, page=2, limit=5)
+    paginated: PaginatedResponse[Member] = PaginatedResponse(
+        items=[], total=0, page=2, limit=5
+    )
     mock_repo.paginate.return_value = paginated
     service._repo = mock_repo
 
@@ -254,7 +271,11 @@ async def test_get_member_success() -> None:
     mock_repo = AsyncMock()
 
     member = _make_member(phone="0901234567", full_name="John Doe")
-    mock_repo.get_by_id.return_value = member
+    mock_repo.get_with_subscription_history.return_value = (
+        member,
+        [],
+        0,
+    )
     service._repo = mock_repo
 
     result = await service.get("member-1")
@@ -262,7 +283,9 @@ async def test_get_member_success() -> None:
     assert result.id == "member-1"
     assert result.phone == "0901234567"
     assert result.full_name == "John Doe"
-    mock_repo.get_by_id.assert_awaited_once_with("member-1")
+    mock_repo.get_with_subscription_history.assert_awaited_once_with(
+        "member-1", page=1, limit=10
+    )
 
 
 @pytest.mark.asyncio
@@ -273,7 +296,11 @@ async def test_get_member_not_found() -> None:
     service = _make_member_service()
     mock_repo = AsyncMock()
 
-    mock_repo.get_by_id.return_value = None
+    mock_repo.get_with_subscription_history.return_value = (
+        None,
+        [],
+        0,
+    )
     service._repo = mock_repo
 
     with pytest.raises(NotFoundException) as exc_info:
@@ -303,7 +330,10 @@ async def test_update_member_success() -> None:
     request_data = UpdateMemberRequest(
         phone="0909999999",
         full_name="Jane Doe",
+        date_of_birth=None,
         gender="Female",
+        avatar_url=None,
+        note=None,
     )
 
     result = await service.update("member-1", request_data)
@@ -327,7 +357,14 @@ async def test_update_member_not_found() -> None:
     mock_repo.get_by_id.return_value = None
     service._repo = mock_repo
 
-    request_data = UpdateMemberRequest(full_name="New Name")
+    request_data = UpdateMemberRequest(
+        phone=None,
+        full_name="New Name",
+        date_of_birth=None,
+        gender=None,
+        avatar_url=None,
+        note=None,
+    )
 
     with pytest.raises(NotFoundException) as exc_info:
         await service.update("invalid-id", request_data)
@@ -350,7 +387,14 @@ async def test_update_member_duplicate_phone() -> None:
     mock_repo.get_one.return_value = other_member  # Phone already exists
     service._repo = mock_repo
 
-    request_data = UpdateMemberRequest(phone="0909999999")
+    request_data = UpdateMemberRequest(
+        phone="0909999999",
+        full_name=None,
+        date_of_birth=None,
+        gender=None,
+        avatar_url=None,
+        note=None,
+    )
 
     with pytest.raises(ConflictException) as exc_info:
         await service.update("member-1", request_data)
@@ -376,7 +420,14 @@ async def test_update_member_partial() -> None:
     mock_repo.update.return_value = updated_member
     service._repo = mock_repo
 
-    request_data = UpdateMemberRequest(full_name="Updated Name")  # Only this field
+    request_data = UpdateMemberRequest(
+        phone=None,
+        full_name="Updated Name",
+        date_of_birth=None,
+        gender=None,
+        avatar_url=None,
+        note=None,
+    )  # Only this field
 
     result = await service.update("member-1", request_data)
 

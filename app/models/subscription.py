@@ -2,12 +2,17 @@ from __future__ import annotations
 
 from datetime import date
 from decimal import Decimal
+from typing import TYPE_CHECKING
 
 from sqlalchemy import Date, Enum, ForeignKey, Numeric
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.core.enum import SubscriptionStatus
 from app.models.base import Base
+
+if TYPE_CHECKING:
+    from app.models.member import Member
+    from app.models.package import Package
 
 
 class Subscription(Base):
@@ -31,3 +36,6 @@ class Subscription(Base):
     updated_by: Mapped[str | None] = mapped_column(
         ForeignKey("users.id"), nullable=True
     )
+
+    member: Mapped[Member] = relationship("Member", back_populates="subscriptions")
+    package: Mapped[Package] = relationship("Package", lazy="joined")

@@ -34,7 +34,7 @@ class SubscriptionService:
         if not member:
             raise NotFoundException(f"Member with id '{payload.member_id}' not found")
 
-        package = await self._package_repo.get_by_id(payload.package_id)
+        package = await self._package_repo.get_active_by_id(payload.package_id)
         if not package:
             raise NotFoundException(f"Package with id '{payload.package_id}' not found")
 
@@ -98,7 +98,7 @@ class SubscriptionService:
             )
 
         package_id = payload.package_id or subscription.package_id
-        package = await self._package_repo.get_by_id(package_id)
+        package = await self._package_repo.get_active_by_id(package_id)
         if not package:
             raise NotFoundException(f"Package with id '{package_id}' not found")
 
