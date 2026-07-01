@@ -31,6 +31,53 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
+OPENAPI_TAGS = [
+    {
+        "name": "Auth",
+        "description": (
+            "Authentication endpoints for signing in, issuing access tokens, "
+            "and invalidating active sessions."
+        ),
+    },
+    {
+        "name": "Members",
+        "description": (
+            "Manage gym members, including profile creation, detail lookup, "
+            "updates, listing, and removal."
+        ),
+    },
+    {
+        "name": "Check-ins",
+        "description": (
+            "Record member check-ins and review visit history over a selected "
+            "date range."
+        ),
+    },
+    {
+        "name": "Admin Users",
+        "description": (
+            "Administrative user management endpoints reserved for privileged "
+            "operators."
+        ),
+    },
+    {
+        "name": "Packages",
+        "description": (
+            "Manage gym packages, including package creation, listing, detail "
+            "lookup, updates, and deactivation."
+        ),
+    },
+    {
+        "name": "Subscriptions",
+        "description": (
+            "Manage member subscriptions created from packages, including the "
+            "subscription lifecycle such as activation, cancellation, and "
+            "listing."
+        ),
+    },
+]
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     logger.info("Starting up %s v%s", settings.APP_NAME, settings.APP_VERSION)
@@ -50,10 +97,15 @@ def create_app() -> FastAPI:
     app = FastAPI(
         title=settings.APP_NAME,
         version=settings.APP_VERSION,
+        description=(
+            "Gym management API for authentication, members, packages, "
+            "subscriptions, check-ins, and administration."
+        ),
         debug=settings.DEBUG,
         lifespan=lifespan,
         docs_url="/docs",
         redoc_url="/redoc",
+        openapi_tags=OPENAPI_TAGS,
     )
 
     app.add_middleware(

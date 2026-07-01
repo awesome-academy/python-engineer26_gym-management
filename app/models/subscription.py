@@ -38,4 +38,4 @@ class Subscription(Base):
     )
 
     member: Mapped[Member] = relationship("Member", back_populates="subscriptions")
-    package: Mapped[Package] = relationship("Package", lazy="joined")
+    package: Mapped[Package] = relationship("Package", back_populates="subscriptions")

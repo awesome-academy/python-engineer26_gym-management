@@ -1,9 +1,10 @@
 from __future__ import annotations
 
-from fastapi import APIRouter, Depends, Response, status
+from fastapi import APIRouter, Body, Depends, Response, status
 from fastapi.responses import JSONResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.api.docs import LOGIN_REQUEST_EXAMPLES, responses_for
 from app.dependencies.auth import (
     get_current_user,
     get_refresh_token_from_cookie,
@@ -18,9 +19,18 @@ from app.core import settings
 router = APIRouter(prefix="/auth", tags=["Auth"])
 
 
-@router.post("/login", response_model=TokenResponse)
+@router.post(
+    "/login",
+    response_model=TokenResponse,
+    summary="Sign in",
+    description="Authenticate a user and issue an access token with a refresh token cookie.",
+    responses=responses_for(
+        status.HTTP_401_UNAUTHORIZED,
+        status.HTTP_422_UNPROCESSABLE_ENTITY,
+    ),
+)
 async def login(
-    data: LoginRequest,
+    data: LoginRequest = Body(..., openapi_examples=LOGIN_REQUEST_EXAMPLES),
     session: AsyncSession = Depends(get_db),
 ) -> Response:
     tokens = await AuthService(session).login(data)
@@ -40,7 +50,13 @@ async def login(
     return response
 
 
-@router.post("/logout", status_code=status.HTTP_204_NO_CONTENT)
+@router.post(
+    "/logout",
+    status_code=status.HTTP_204_NO_CONTENT,
+    summary="Sign out",
+    description="Invalidate the current access and refresh tokens and clear the refresh token cookie.",
+    responses=responses_for(status.HTTP_401_UNAUTHORIZED),
+)
 async def logout(
     current_user: User = Depends(get_current_user),
     access_token: str = Depends(get_token_from_bearer),
